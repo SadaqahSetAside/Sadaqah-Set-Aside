@@ -317,6 +317,38 @@
     <strong>Recommendation:</strong> 1% additional sadaqah purifies remaining wealth<br><br>
     Zakat = Obligation | Sadaqah = Blessing
 </div>
+
+<div class="card" style="margin-top: 30px; background: linear-gradient(135deg, #f8fafc 0%, #eefbf7 100%); border: 2px solid #10b981;">
+    <h2><i class="fab fa-bitcoin"></i> Free BTC Donation</h2>
+    <p style="margin-bottom: 18px; color: #475569;">Support Sadaqah Set Aside with any free Bitcoin donation. Every contribution helps keep the calculator private, open, and free for the Ummah.</p>
+    <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+        <div style="background: white; padding: 18px; border-radius: 12px; border: 1px solid #dbeafe; box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);">
+            <div style="display:flex; justify-content:space-between; gap:12px; align-items:center; flex-wrap:wrap;">
+                <div>
+                    <div style="font-size: 0.9em; color:#64748b; margin-bottom: 4px;">BTC Wallet Address</div>
+                    <div style="font-family: monospace; font-size: 1.05em; font-weight: 700; word-break: break-all; color: #0f172a;">bc1qq2vg5saty4gx32nyc9hlkhld5fj5wtdaxwcuxy</div>
+                </div>
+                <button onclick="copyWallet()" class="button button-secondary" style="white-space: nowrap;">
+                    <i class="fas fa-copy"></i> Copy Address
+                </button>
+            </div>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+            <div style="background:#ecfeff; padding: 16px; border-radius: 12px; border-left: 4px solid #06b6d4;">
+                <strong style="display:block; margin-bottom:6px;">How to give</strong>
+                Send any amount from your BTC wallet. Even small donations help.
+            </div>
+            <div style="background:#f0fdf4; padding: 16px; border-radius: 12px; border-left: 4px solid #10b981;">
+                <strong style="display:block; margin-bottom:6px;">Why this helps</strong>
+                Supports hosting, updates, and keeping the app free for users.
+            </div>
+        </div>
+        <div style="background:#fff7ed; padding: 16px; border-radius: 12px; border-left: 4px solid #f59e0b; color:#9a3412;">
+            <strong>Reminder:</strong> This is a voluntary donation, not zakat. Zakat must still go to eligible recipients, while this BTC donation supports the project itself.
+        </div>
+    </div>
+</div>
+
 <!-- Charity Links -->
         <div class="charity-links">
             <a href="https://www.islamic-relief.org.uk" target="_blank" class="charity-link">
@@ -489,6 +521,15 @@
             calculateZakat();
             updateHawl();
         });
-    </script>
+    
+        function copyWallet() {
+            const wallet = 'bc1qq2vg5saty4gx32nyc9hlkhld5fj5wtdaxwcuxy';
+            navigator.clipboard.writeText(wallet).then(() => {
+                alert('BTC wallet copied to clipboard');
+            }).catch(() => {
+                alert('Copy failed. Wallet: ' + wallet);
+            });
+        }
+</script>
 </body>
 </html>
