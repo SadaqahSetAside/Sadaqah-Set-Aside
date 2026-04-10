@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sadaqah Set Aside - Zakat & Charity Calculator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #1e7c7e; --secondary: #2a9d9f; --accent: #d4af37; --success: #10b981;
+            --warning: #f59e0b; --danger: #ef4444; --dark: #0f172a; --light: #f8fafc; --border: #e2e8f0;
+        }
+        body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #f8fafc 0%, #e0f2f1 100%); color: var(--dark); line-height: 1.6; min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 40px; padding: 30px 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); border-radius: 16px; color: white; box-shadow: 0 10px 30px rgba(30, 124, 126, 0.3); }
+        header h1 { font-size: 2.5em; margin-bottom: 10px; font-weight: 700; }
+        header .subtitle { font-size: 1.1em; opacity: 0.95; font-weight: 300; }
+        .badges { display: flex; gap: 10px; justify-content: center; margin-top: 15px; flex-wrap: wrap; }
+        .badge { background: rgba(255,255,255,0.2); padding: 6px 14px; border-radius: 20px; font-size: 0.85em; border: 1px solid rgba(255,255,255,0.3); }
+        .main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        @media (max-width: 768px) { .main-grid { grid-template-columns: 1fr; } }
+        .card { background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08); border: 1px solid var(--border); }
+        .card h2 { font-size: 1.5em; margin-bottom: 20px; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .card h3 { font-size: 1.2em; margin: 25px 0 15px 0; color: var(--primary); border-left: 4px solid var(--accent); padding-left: 15px; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--dark); font-size: 0.95em; }
+        .input-group { display: flex; gap: 10px; align-items: center; }
+        input[type="number"], input[type="text"], input[type="date"], select { flex: 1; padding: 12px 14px; border: 2px solid var(--border); border-radius: 8px; font-size: 1em; font-family: 'Inter', sans-serif; transition: all 0.3s ease; }
+        input[type="number"]:focus, input[type="text"]:focus, input[type="date"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30, 124, 126, 0.1); }
+        .currency-select { width: 100px; }
+        .price-input-group { display: flex; gap: 10px; align-items: center; }
+        .live-price-btn { background: var(--success); color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 0.9em; font-weight: 600; display: flex; align-items: center; gap: 5px; }
+        .live-price-btn.loading i { animation: spin 1s linear infinite; }
+        .live-price-btn.live-updated { background: var(--accent); }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .nisab-toggle { display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: var(--light); border-radius: 8px; border: 2px solid var(--border); }
+        .nisab-option { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; flex: 1; text-align: center; }
+        .nisab-option.active { background: var(--primary); color: white; }
+        .nisab-option input[type="radio"] { display: none; }
+        .nisab-option .icon { font-size: 1.2em; }
+        .nisab-option.gold .icon { color: var(--accent); }
+        .nisab-option.silver .icon { color: var(--warning); }
+        .button { padding: 12px 24px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 1em; }
+        .button-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; width: 100%; margin-top: 10px; }
+        .button-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(30, 124, 126, 0.3); }
+        .button-secondary { background: var(--light); color: var(--primary); border: 2px solid var(--primary); }
+        .button-secondary:hover { background: var(--primary); color: white; }
+        .result-box { background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(212, 175, 55, 0.1) 100%); padding: 20px; border-radius: 8px; border-left: 4px solid var(--success); margin-top: 20px; }
+        .result-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
+        .result-item:last-child { border-bottom: none; margin-bottom: 0; }
+        .result-label { font-weight: 500; color: var(--dark); }
+        .result-value { font-weight: 700; font-size: 1.2em; color: var(--primary); }
+        .result-value.zakat { color: var(--success); }
+        .result-value.sadaqah { color: var(--accent); }
+        .nisab-status { padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; }
+        .nisab-status.below { background: #fef3c7; border-left: 4px solid var(--warning); color: #92400e; }
+        .nisab-status.above { background: #dcfce7; border-left: 4px solid var(--success); color: #166534; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid var(--border); }
+        .tab-button { padding: 12px 16px; background: none; border: none; cursor: pointer; font-weight: 500; color: #94a3b8; border-bottom: 3px solid transparent; transition: all 0.3s ease; }
+        .tab-button.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .info-box { background: #f0f9ff; border-left: 4px solid #0284c7; padding: 15px; border-radius: 6px; margin-bottom: 20px; font-size: 0.95em; color: #0c4a6e; }
+        .charity-links { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+        .charity-link { background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%); color: white; padding: 15px; border-radius: 8px; text-align: center; text-decoration: none; font-weight: 600; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .charity-link:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(30, 124, 126, 0.3); }
+        .summary-section { background: linear-gradient(135deg, #f0fdf4 0%, #f0f9ff 100%); padding: 25px; border-radius: 12px; border: 2px solid var(--success); margin-top: 30px; }
+        .summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .summary-item { text-align: center; }
+        .summary-item .label { font-size: 0.9em; color: #64748b; margin-bottom: 8px; }
+        .summary-item .value { font-size: 2em; font-weight: 700; color: var(--primary); }
+        .summary-item .value.sadaqah { color: var(--accent); }
+        .disclaimer { font-size: 0.85em; color: #64748b; line-height: 1.6; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .islamic-text { font-style: italic; color: #64748b; font-size: 0.9em; margin-top: 15px; padding: 12px; border-left: 3px solid var(--accent); background: rgba(212, 175, 55, 0.05); }
+        .comparison-badge { display: inline-block; background: var(--accent); color: var(--dark); padding: 4px 8px; border-radius: 4px; font-size: 0.8em; font-weight: 600; margin-left: 8px; }
+        .hawl-tracker { background: linear-gradient(135deg, var(--warning) 0%, #fbbf24 100%); margin-top: 20px; padding: 20px; border-radius: 12px; }
+        .hawl-progress { background: white; border-radius: 10px; padding: 20px; margin-top: 15px; text-align: center; }
+        .progress-bar { background: #e5e7eb; height: 12px; border-radius: 6px; margin: 15px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--success), var(--accent)); transition: width 0.3s ease; border-radius: 6px; }
+        .crypto-rates { background: var(--light); padding: 15px; border-radius: 8px; margin-top: 10px; font-size: 0.9em; }
+        footer { text-align: center; padding: 30px 20px; color: #64748b; border-top: 1px solid var(--border); margin-top: 50px; font-size: 0.9em; }
+        @media print { body { background: white; } .button, .tabs { display: none; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-heart"></i> Sadaqah Set Aside</h1>
+            <p class="subtitle">Trust-First Zakat & Charity Calculator</p>
+            <div class="badges">
+                <span class="badge"><i class="fas fa-shield-alt"></i> Shariah-Compliant</span>
+                <span class="badge"><i class="fas fa-lock"></i> Privacy First</span>
+                <span class="badge"><i class="fas fa-wifi"></i> Live Prices</span>
+                <span class="badge"><i class="fas fa-infinity"></i> Hawl Tracker</span>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <div class="card">
+                <h2><i class="fas fa-calculator"></i> Your Assets</h2>
+
+                <div class="nisab-toggle">
+                    <label class="nisab-option gold active" for="nisab-gold">
+                        <i class="fas fa-ring icon"></i>
+                        <div><strong>Gold Nisab</strong><br><small>87.48g (~£5,250)</small></div>
+                        <input type="radio" id="nisab-gold" name="nisab" value="gold" checked onchange="setNisab('gold')">
+                    </label>
+                    <label class="nisab-option silver" for="nisab-silver">
+                        <i class="fas fa-coins icon"></i>
+                        <div><strong>Silver Nisab</strong><br><small>612.36g (~£490)</small></div>
+                        <input type="radio" id="nisab-silver" name="nisab" value="silver" onchange="setNisab('silver')">
+                    </label>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-button active" onclick="switchTab('fiat')">Fiat & Cash</button>
+                    <button class="tab-button" onclick="switchTab('precious')">Precious Metals</button>
+                    <button class="tab-button" onclick="switchTab('crypto')">Cryptocurrency</button>
+                </div>
+
+                <!-- Fiat Tab -->
+                <div id="fiat" class="tab-content active">
+                    <div class="form-group">
+                        <label>Cash & Savings</label>
+                        <div class="input-group">
+                            <input type="number" id="fiatAmount" placeholder="0" step="0.01" oninput="calculate()">
+                            <select id="fiatCurrency" onchange="fetchLivePrices()">
+                                <option value="GBP">GBP £</option>
+                                <option value="USD">USD $</option>
+                                <option value="EUR">EUR €</option>
+                                <option value="AED">AED د.إ</option>
+                                <option value="SAR">SAR ر.س</option>
+                                <option value="PKR">PKR ₨</option>
+                                <option value="AUD">AUD $</option>
+                                <option value="CAD">CAD $</option>
+                                <option value="SGD">SGD $</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bank Accounts (Total)</label>
+                        <input type="number" id="bankAmount" placeholder="0" step="0.01" oninput="calculate()">
+                    </div>
+                    <div class="form-group">
+                        <label>Debts Owed (Deduct)</label>
+                        <input type="number" id="debtsAmount" placeholder="0" step="0.01" oninput="calculate()">
+                    </div>
+                    <div class="form-group">
+                        <label>Stablecoins (USDT, USDC, DAI)</label>
+                        <input type="number" id="stablecoinAmount" placeholder="0" step="0.01" oninput="calculate()">
+                    </div>
+                </div>
+
+                <!-- Precious Metals Tab -->
+                <div id="precious" class="tab-content">
+                    <div class="form-group">
+                        <label><i class="fas fa-ring"></i> Gold (investment & jewelry)</label>
+                        <div class="input-group">
+                            <input type="number" id="goldGrams" placeholder="0" step="0.1" oninput="calculate()">
+                            <span style="color: #64748b; min-width: 50px;">grams</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Gold Price Per Gram <span id="goldLiveStatus">(Manual)</span></label>
+                        <div class="input-group">
+                            <input type="number" id="goldPrice" placeholder="60" step="0.01" value="60" oninput="calculate()">
+                            <button class="live-price-btn" onclick="fetchLivePrices('gold')">
+                                <i class="fas fa-wifi"></i> Live
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-coins"></i> Silver (investment & jewelry)</label>
+                        <div class="input-group">
+                            <input type="number" id="silverGrams" placeholder="0" step="0.1" oninput="calculate()">
+                            <span style="color: #64748b; min-width: 50px;">grams</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Silver Price Per Gram <span id="silverLiveStatus">(Manual)</span></label>
+                        <div class="input-group">
+                            <input type="number" id="silverPrice" placeholder="0.80" step="0.01" value="0.80" oninput="calculate()">
+                            <button class="live-price-btn" onclick="fetchLivePrices('silver')">
+                                <i class="fas fa-wifi"></i> Live
+                            </button>
+                        </div>
+                    </div>
+                    <div class="info-box">
+                        <strong>Gold Nisab:</strong> 87.48g <span class="comparison-badge">Most Schools</span><br>
+                        <strong>Silver Nisab:</strong> 612.36g <span class="comparison-badge">Hanafi School</span>
+                    </div>
+                </div>
+
+                <!-- Crypto Tab -->
+                <div id="crypto" class="tab-content">
+                    <div class="form-group">
+                        <label><i class="fab fa-bitcoin"></i> Bitcoin Holdings (market value)</label>
+                        <div class="input-group">
+                            <input type="number" id="cryptoValue" placeholder="0" step="0.01" oninput="calculate()">
+                            <button class="live-price-btn" onclick="fetchLivePrices('btc')">
+                                <i class="fas fa-wifi"></i> Live
+                            </button>
+                        </div>
+                        <div class="crypto-rates" id="btcRate"></div>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fab fa-ethereum"></i> Ethereum Holdings (market value)</label>
+                        <div class="input-group">
+                            <input type="number" id="altcoinValue" placeholder="0" step="0.01" oninput="calculate()">
+                            <button class="live-price-btn" onclick="fetchLivePrices('eth')">
+                                <i class="fas fa-wifi"></i> Live
+                            </button>
+                        </div>
+                        <div class="crypto-rates" id="ethRate"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Altcoins & Other Crypto (total value)</label>
+                        <input type="number" id="stakingValue" placeholder="0" step="0.01" oninput="calculate()">
+                    </div>
+                    <div class="info-box">
+                        <strong>Crypto Ruling:</strong> Market value at zakat due date. 2.5% when above nisab for 354 days.
+                    </div>
+                </div>
+
+                <button class="button button-primary" onclick="calculate()">
+                    <i class="fas fa-sync"></i> Calculate Zakat
+                </button>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-chart-pie"></i> Your Obligation</h2>
+                <div id="nisabStatus" class="nisab-status below"></div>
+                <div id="results" style="display: none;">
+                    <div class="result-box">
+                        <div class="result-item">
+                            <span class="result-label">Total Zakatable Assets</span>
+                            <span class="result-value" id="totalAssets">£0.00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label" id="nisabLabel">Nisab Threshold (Gold)</span>
+                            <span class="result-value" id="nisabValue">£5,248.80</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label">Surplus Above Nisab</span>
+                            <span class="result-value" id="surplus">£0.00</span>
+                        </div>
+                    </div>
+                    <div class="result-box" style="border-left-color: var(--success); margin-top: 25px;">
+                        <div class="result-item">
+                            <span class="result-label"><i class="fas fa-mosque"></i> Zakat Due (2.5%)</span>
+                            <span class="result-value zakat" id="zakatDue">£0.00</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="result-label" style="color: var(--accent);">💛 Sadaqah Recommended</span>
+                            <span class="result-value sadaqah" id="sadaqahDue">£0.00</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="noResults" style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+                    <i class="fas fa-calculator" style="font-size: 2em; margin-bottom: 15px;"></i>
+                    <p>Enter your assets above to calculate your zakat and sadaqah obligations</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hawl Tracker Section -->
+        <div class="card hawl-tracker">
+            <h3><i class="fas fa-calendar-alt"></i> Hawl Tracker (354 Days)</h3>
+            <div class="form-group">
+                <label>Hawl Start Date (when wealth first exceeded nisab)</label>
+                <input type="date" id="hawlStartDate" onchange="updateHawlProgress()">
+            </div>
+            <div class="hawl-progress">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span id="hawlDaysElapsed">0 days passed</span>
+                    <span id="hawlDaysRemaining">354 days left</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="hawlProgressBar" style="width: 0%"></div>
+                </div>
+                <div style="margin-top: 15px; font-weight: 600;" id="hawlStatus">Set your hawl start date above</div>
+                <div class="info-box" style="margin-top: 15px;">
+                    <strong>Zakat due date:</strong> <span id="hawlDueDate"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <h2 style="margin-bottom: 25px; color: var(--primary);">
+                <i class="fas fa-check-circle"></i> Annual Summary
+            </h2>
+            <div class="summary-grid">
+                <div class="summary-item">
+                    <div class="label">ZAKAT OBLIGATION</div>
+                    <div class="value" id="summaryZakat">£0.00</div>
+                </div>
+                <div class="summary-item">
+                    <div class="label">SADAQAH RECOMMENDED</div>
+                    <div class="value sadaqah" id="summarySadaqah">£0.00</div>
+                </div>
+            </div>
+            <div class="charity-links">
+                <a href="https://www.islamic-relief.org.uk" class="charity-link" target="_blank"><i class="fas fa-heart"></i> Islamic Relief</a>
+                <a href="https://www.muslim-hands.org.uk" class="charity-link" target="_blank"><i class="fas fa-hands-helping"></i> Muslim Hands</a>
+                <a href="https://www.zakatfoundation.org" class="charity-link" target="_blank"><i class="fas fa-donate"></i> Zakat Foundation</a>
+                <a href="https://www.dompet-dhuafa.org" class="charity-link" target="_blank"><i class="fas fa-mosque"></i> Dompet Dhuafa</a>
+            </div>
+        </div>
+
+        <div class="disclaimer" style="max-width: 800px; margin: 30px auto; padding: 20px;">
+            <strong>📋 Disclaimer:</strong> Guidance only. Consult qualified Islamic scholar for final confirmation. Live prices from free APIs. All data stays on your device.
+        </div>
+    </div>
+
+    <script>
+        let currentNisab = 'gold';
+        let cryptoRates = {};
+        let hawlStartDate = null;
+
+        function setNisab(type) {
+            currentNisab = type;
+            document.querySelectorAll('.nisab-option').forEach(option => option.classList.remove('active'));
+            event.target.closest('.nisab-option').classList.add('active');
+            document.getElementById('nisabLabel').textContent = `Nisab Threshold (${type.charAt(0).toUpperCase() + type.slice(1)})`; 
+            calculate();
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        async function fetchLivePrices(type = 'all') {
+            try {
+                const btn = event.target.closest('.live-price-btn');
+                btn.classList.add('loading');
+                btn.innerHTML = '<i class="fas fa-spinner"></i> Loading...';
+
+                const currency = document.getElementById('fiatCurrency').value.toLowerCase();
+
+                // Gold & Silver - MetalpriceAPI (free, no key)
+                if (type === 'all' || type === 'gold' || type === 'silver') {
+                    const metalResponse = await fetch(`https://api.metalpriceapi.com/v1/latest?base=${currency}&currencies=XAU,XAG`);
+                    const metalData = await metalResponse.json();
+                    if (metalData.rates) {
+                        const goldPrice = (metalData.rates.XAU * 31.1035).toFixed(2); // oz to gram
+                        const silverPrice = (metalData.rates.XAG * 31.1035).toFixed(2);
+
+                        document.getElementById('goldPrice').value = goldPrice;
+                        document.getElementById('silverPrice').value = silverPrice;
+                        document.getElementById('goldLiveStatus').textContent = 'Live ✓';
+                        document.getElementById('silverLiveStatus').textContent = 'Live ✓';
+                    }
+                }
+
+                // Crypto - CoinGecko (free, no key)
+                if (type === 'all' || type === 'btc' || type === 'eth') {
+                    const cryptoResponse = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=${currency}`);
+                    cryptoRates = await cryptoResponse.json();
+
+                    if (cryptoRates.bitcoin) {
+                        const btcPrice = cryptoRates.bitcoin[currency];
+                        document.getElementById('cryptoValue').placeholder = `BTC: £${btcPrice.toLocaleString()}`;
+                        document.getElementById('btcRate').textContent = `1 BTC = £${btcPrice.toLocaleString()}`;
+                    }
+                    if (cryptoRates.ethereum) {
+                        const ethPrice = cryptoRates.ethereum[currency];
+                        document.getElementById('altcoinValue').placeholder = `ETH: £${ethPrice.toLocaleString()}`;
+                        document.getElementById('ethRate').textContent = `1 ETH = £${ethPrice.toLocaleString()}`;
+                    }
+                }
+
+                calculate();
+
+            } catch (error) {
+                console.log('Live prices unavailable - using manual');
+            } finally {
+                const btn = event.target.closest('.live-price-btn');
+                btn.classList.remove('loading');
+                btn.innerHTML = '<i class="fas fa-wifi"></i> Live ✓';
+                setTimeout(() => btn.innerHTML = '<i class="fas fa-wifi"></i> Live', 2000);
+            }
+        }
+
+        function updateHawlProgress() {
+            const startDate = document.getElementById('hawlStartDate').value;
+            if (!startDate) return;
+
+            hawlStartDate = new Date(startDate);
+            const today = new Date();
+            const diffTime = Math.abs(today - hawlStartDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const totalHawlDays = 354;
+            const progressPercent = Math.min((diffDays / totalHawlDays) * 100, 100);
+
+            document.getElementById('hawlDaysElapsed').textContent = `${diffDays} days passed`;
+            document.getElementById('hawlDaysRemaining').textContent = `${Math.max(totalHawlDays - diffDays, 0)} days left`;
+            document.getElementById('hawlProgressBar').style.width = `${progressPercent}%`;
+
+            const dueDate = new Date(hawlStartDate);
+            dueDate.setDate(dueDate.getDate() + totalHawlDays);
+            document.getElementById('hawlDueDate').textContent = dueDate.toLocaleDateString('en-GB', { 
+                weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+            });
+
+            const statusEl = document.getElementById('hawlStatus');
+            if (diffDays >= totalHawlDays) {
+                statusEl.textContent = '✅ HAWL COMPLETE - Zakat now due!';
+                statusEl.style.color = 'var(--success)';
+            } else if (diffDays > totalHawlDays * 0.9) {
+                statusEl.textContent = '⚠️ Hawl almost complete - prepare zakat payment';
+                statusEl.style.color = 'var(--warning)';
+            } else {
+                statusEl.textContent = `Hawl in progress - ${Math.round(totalHawlDays - diffDays)} days remaining`;
+                statusEl.style.color = 'var(--primary)';
+            }
+        }
+
+        function calculate() {
+            const fiat = parseFloat(document.getElementById('fiatAmount').value) || 0;
+            const bank = parseFloat(document.getElementById('bankAmount').value) || 0;
+            const debts = parseFloat(document.getElementById('debtsAmount').value) || 0;
+            const stablecoins = parseFloat(document.getElementById('stablecoinAmount').value) || 0;
+
+            const goldGrams = parseFloat(document.getElementById('goldGrams').value) || 0;
+            const goldPrice = parseFloat(document.getElementById('goldPrice').value) || 60;
+            const goldValue = goldGrams * goldPrice;
+
+            const silverGrams = parseFloat(document.getElementById('silverGrams').value) || 0;
+            const silverPrice = parseFloat(document.getElementById('silverPrice').value) || 0.80;
+            const silverValue = silverGrams * silverPrice;
+
+            const crypto = parseFloat(document.getElementById('cryptoValue').value) || 0;
+            const altcoins = parseFloat(document.getElementById('altcoinValue').value) || 0;
+            const staking = parseFloat(document.getElementById('stakingValue').value) || 0;
+
+            const totalAssets = fiat + bank + goldValue + silverValue + crypto + altcoins + staking + stablecoins - debts;
+            const totalPositive = Math.max(totalAssets, 0);
+
+            const currency = document.getElementById('fiatCurrency').value;
+            const currencySymbol = getCurrencySymbol(currency);
+
+            let nisabGrams, nisabPrice, nisabValue, nisabLabel;
+            if (currentNisab === 'gold') {
+                nisabGrams = 87.48;
+                nisabPrice = goldPrice;
+                nisabValue = nisabGrams * nisabPrice;
+                nisabLabel = 'Nisab Threshold (Gold)';
+            } else {
+                nisabGrams = 612.36;
+                nisabPrice = silverPrice;
+                nisabValue = nisabGrams * nisabPrice;
+                nisabLabel = 'Nisab Threshold (Silver)';
+            }
+
+            const belowNisab = totalPositive < nisabValue;
+
+            const nisabStatus = document.getElementById('nisabStatus');
+            if (belowNisab) {
+                nisabStatus.className = 'nisab-status below';
+                nisabStatus.innerHTML = `<i class="fas fa-info-circle"></i> <strong>Below ${currentNisab.toUpperCase()} Nisab:</strong> Total: ${currencySymbol}${totalPositive.toFixed(2)} | Nisab: ${currencySymbol}${nisabValue.toFixed(2)}`;
+            } else {
+                nisabStatus.className = 'nisab-status above';
+                nisabStatus.innerHTML = `<i class="fas fa-check-circle"></i> <strong>ABOVE ${currentNisab.toUpperCase()} Nisab:</strong> Surplus: ${currencySymbol}${Math.max(totalPositive - nisabValue, 0).toFixed(2)}`;
+            }
+
+            const zakatDue = totalPositive * 0.025;
+            const sadaqahDue = Math.max((totalPositive - nisabValue) * 0.025, 0);
+
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('noResults').style.display = 'none';
+
+            document.getElementById('totalAssets').textContent = `${currencySymbol}${totalPositive.toFixed(2)}`;
+            document.getElementById('nisabLabel').textContent = nisabLabel;
+            document.getElementById('nisabValue').textContent = `${currencySymbol}${nisabValue.toFixed(2)}`;
+            document.getElementById('surplus').textContent = `${currencySymbol}${Math.max(totalPositive - nisabValue, 0).toFixed(2)}`;
+            document.getElementById('zakatDue').textContent = `${currencySymbol}${belowNisab ? '0.00' : zakatDue.toFixed(2)}`;
+            document.getElementById('sadaqahDue').textContent = `${currencySymbol}${sadaqahDue.toFixed(2)}`;
+
+            document.getElementById('summaryZakat').textContent = `${currencySymbol}${belowNisab ? '0.00' : zakatDue.toFixed(2)}`;
+            document.getElementById('summarySadaqah').textContent = `${currencySymbol}${sadaqahDue.toFixed(2)}`;
+
+            localStorage.setItem('zakatData', JSON.stringify({
+                fiat, bank, debts, stablecoins, goldGrams, goldPrice, silverGrams, silverPrice, 
+                crypto, altcoins, staking, currency, currentNisab, hawlStartDate: document.getElementById('hawlStartDate').value
+            }));
+        }
+
+        function getCurrencySymbol(currency) {
+            const symbols = {'GBP': '£','USD': '$','EUR': '€','AED': 'د.إ','SAR': 'ر.س','PKR': '₨','AUD': '$','CAD': '$','SGD': '$'};
+            return symbols[currency] || currency;
+        }
+
+        window.addEventListener('load', function() {
+            const savedData = localStorage.getItem('zakatData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                ['fiatAmount','bankAmount','debtsAmount','stablecoinAmount','goldGrams','goldPrice','silverGrams','silverPrice','cryptoValue','altcoinValue','stakingValue'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && data[id.replace('Amount','').toLowerCase()] !== undefined) el.value = data[id.replace('Amount','').toLowerCase()];
+                });
+                document.getElementById('fiatCurrency').value = data.currency || 'GBP';
+                document.getElementById('hawlStartDate').value = data.hawlStartDate || '';
+
+                if (data.currentNisab) setNisab(data.currentNisab);
+                updateHawlProgress();
+                calculate();
+            }
+            fetchLivePrices(); // Load live prices on startup
+        });
+    </script>
+</body>
+</html>
